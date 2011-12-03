@@ -2114,6 +2114,15 @@ with the extension removed and replaced with .html."
   (interactive)
   (browse-url (markdown-export)))
 
+(defun markdown-copy-html ()
+  "process file with multimarkdown and save it accordingly"
+  (interactive)
+  (save-window-excursion
+    (markdown)
+    (with-current-buffer markdown-output-buffer-name
+      (kill-ring-save (point-min) (point-max)))))
+
+
 ;;; WikiLink Following/Markup =================================================
 
 (require 'thingatpt)

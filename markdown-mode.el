@@ -1,5 +1,6 @@
 ;;; markdown-mode.el --- Emacs Major mode for Markdown-formatted text files
 
+;; Copyright (C) 2011 Donald Ephraim Curtis <dcurtis@milkbox.net>
 ;; Copyright (C) 2007-2011 Jason R. Blevins <jrblevin@sdf.org>
 ;; Copyright (C) 2007, 2009 Edward O'Connor <ted@oconnor.cx>
 ;; Copyright (C) 2007 Conal Elliott <conal@conal.net>
@@ -538,8 +539,8 @@ This will not take effect until Emacs is restarted."
   "Position where new footnotes are inserted in the document."
   :group 'markdown
   :type '(choice (const :tag "At the end of the document" end)
-		 (const :tag "Immediately after the paragraph" immediately)
-		 (const :tag "Before next header" header)))
+                 (const :tag "Immediately after the paragraph" immediately)
+                 (const :tag "Before next header" header)))
 
 ;;; Font lock =================================================================
 
@@ -832,7 +833,7 @@ text.")
   "Regular expression for itex $..$ or $$..$$ math mode expressions.")
 
 (defconst markdown-regex-latex-display
-    "^\\\\\\[\\(.\\|\n\\)*?\\\\\\]$"
+  "^\\\\\\[\\(.\\|\n\\)*?\\\\\\]$"
   "Regular expression for itex \[..\] display mode expressions.")
 
 (defconst markdown-regex-list-indent
@@ -1004,7 +1005,7 @@ If we are at the last line, then consider the next line to be blank."
       (forward-line -1)
       (end-of-line))))
 
-; From html-helper-mode
+;; From html-helper-mode
 (defun markdown-match-comments (last)
   "Match HTML comments from the point to LAST."
   (cond ((search-forward "<!--" last t)
@@ -1134,16 +1135,16 @@ This helps improve font locking for block constructs such as pre blocks."
 ;;; Element Insertion =========================================================
 
 (defun markdown-wrap-or-insert (s1 s2)
- "Insert the strings S1 and S2.
+  "Insert the strings S1 and S2.
 If Transient Mark mode is on and a region is active, wrap the strings S1
 and S2 around the region."
- (if (and transient-mark-mode mark-active)
-     (let ((a (region-beginning)) (b (region-end)))
-       (goto-char a)
-       (insert s1)
-       (goto-char (+ b (length s1)))
-       (insert s2))
-   (insert s1 s2)))
+  (if (and transient-mark-mode mark-active)
+      (let ((a (region-beginning)) (b (region-end)))
+        (goto-char a)
+        (insert s1)
+        (goto-char (+ b (length s1)))
+        (insert s2))
+    (insert s1 s2)))
 
 (defun markdown-insert-hr ()
   "Insert a horizonal rule using `markdown-hr-string'."
@@ -1157,7 +1158,7 @@ and S2 around the region."
   ;; Following blank line
   (backward-char)
   (unless (looking-at "\n\n")
-          (insert "\n")))
+    (insert "\n")))
 
 (defun markdown-insert-bold ()
   "Insert markup for a bold word or phrase.
@@ -1228,7 +1229,7 @@ paragraph."
       (insert text))
     (insert (concat "]: " url))
     (unless (> (length url) 0)
-        (setq end (point)))
+      (setq end (point)))
     (when (> (length title) 0)
       (insert (concat " \"" title "\"")))
     (insert "\n")
@@ -1380,7 +1381,7 @@ of each line."
         (goto-char end)
         (if (not (or (looking-at "\n\n")
                      (and (equal (1+ end) (point-max)) (looking-at "\n"))))
-          (insert "\n"))
+            (insert "\n"))
         ;; Insert PREFIX
         (goto-char beg)
         (beginning-of-line)
@@ -1418,10 +1419,10 @@ Arguments BEG and END specify the beginning and end of the region."
     (save-excursion
       (goto-char (point-min))
       (while (re-search-forward (concat "^\\[\\^\\(" markdown-footnote-chars "*?\\)\\]:")
-				(point-max) t)
-	(let ((fn (string-to-number (match-string 1))))
-	  (when (> fn markdown-footnote-counter)
-	    (setq markdown-footnote-counter fn))))))
+                                (point-max) t)
+        (let ((fn (string-to-number (match-string 1))))
+          (when (> fn markdown-footnote-counter)
+            (setq markdown-footnote-counter fn))))))
   (incf markdown-footnote-counter))
 
 (defun markdown-footnote-new ()
@@ -1442,11 +1443,11 @@ footnote text."
     ;; search for a header. if none is found, go to the end of the document.
     (catch 'eof
       (while (progn
-	       (forward-paragraph)
-	       (unless (re-search-forward markdown-regex-header nil t)
-		 (throw 'eof nil))
-	       (backward-paragraph)
-	       (not (looking-at (concat "\n" markdown-regex-header))))))))
+               (forward-paragraph)
+               (unless (re-search-forward markdown-regex-header nil t)
+                 (throw 'eof nil))
+               (backward-paragraph)
+               (not (looking-at (concat "\n" markdown-regex-header))))))))
   ;; make sure we're on an empty line:
   (unless (markdown-cur-line-blank-p)
     (insert "\n"))
@@ -1463,18 +1464,18 @@ footnote text."
   (interactive)
   ;; first make sure we're at a footnote marker
   (unless (or (looking-back (concat "\\[\\^" markdown-footnote-chars "*\\]?") (point-at-bol))
-	      (looking-at (concat "\\[?\\^" markdown-footnote-chars "*?\\]")))
+              (looking-at (concat "\\[?\\^" markdown-footnote-chars "*?\\]")))
     (error "Not at a footnote"))
   (let* ((fn nil)
-	 (new-pos (save-excursion
-		    ;; move point between [ and ^:
-		    (if (looking-at "\\[")
-			(forward-char 1)
-		      (skip-chars-backward "^["))
-		    (looking-at (concat "\\(\\^" markdown-footnote-chars "*?\\)\\]"))
-		    (setq fn (match-string 1))
-		    (goto-char (point-min))
-		    (re-search-forward (concat "^\\[" fn "\\]:") nil t))))
+         (new-pos (save-excursion
+                    ;; move point between [ and ^:
+                    (if (looking-at "\\[")
+                        (forward-char 1)
+                      (skip-chars-backward "^["))
+                    (looking-at (concat "\\(\\^" markdown-footnote-chars "*?\\)\\]"))
+                    (setq fn (match-string 1))
+                    (goto-char (point-min))
+                    (re-search-forward (concat "^\\[" fn "\\]:") nil t))))
     (unless new-pos
       (error "No definition found for footnote `%s'" fn))
     (goto-char new-pos)
@@ -1484,20 +1485,20 @@ footnote text."
   "Return from a footnote to its footnote number in the main text."
   (interactive)
   (let ((fn (save-excursion
-	      (backward-paragraph)
-	      ;; if we're in a multiparagraph footnote, we need to back up further
-	      (while (>= (markdown-next-line-indent) 4)
-		(backward-paragraph))
-	      (forward-line)
-	      (if (looking-at (concat "^\\[\\(\\^" markdown-footnote-chars "*?\\)\\]:"))
-		  (match-string 1)))))
+              (backward-paragraph)
+              ;; if we're in a multiparagraph footnote, we need to back up further
+              (while (>= (markdown-next-line-indent) 4)
+                (backward-paragraph))
+              (forward-line)
+              (if (looking-at (concat "^\\[\\(\\^" markdown-footnote-chars "*?\\)\\]:"))
+                  (match-string 1)))))
     (unless fn
       (error "Not in a footnote"))
     (let ((new-pos (save-excursion
-		     (goto-char (point-min))
-		     (re-search-forward (concat "\\[" fn "\\]\\([^:]\\|\\'\\)") nil t))))
+                     (goto-char (point-min))
+                     (re-search-forward (concat "\\[" fn "\\]\\([^:]\\|\\'\\)") nil t))))
       (unless new-pos
-	(error "Footnote `%s' not found" fn))
+        (error "Footnote `%s' not found" fn))
       (goto-char new-pos)
       (skip-chars-backward "^]"))))
 
@@ -1540,8 +1541,8 @@ default indentation level."
     ;; Previous non-list-marker indent
     (setq pos (markdown-prev-non-list-indent))
     (when pos
-        (setq positions (cons pos positions))
-        (setq positions (cons (+ pos tab-width) positions)))
+      (setq positions (cons pos positions))
+      (setq positions (cons (+ pos tab-width) positions)))
 
     ;; Indentation of the previous line + tab-width
     (cond
@@ -1590,7 +1591,6 @@ it in the usual way."
       (markdown-follow-wiki-link-at-point)
     (markdown-do-normal-return)))
 
-
 
 ;;; Keymap ====================================================================
 
@@ -1708,16 +1708,16 @@ The string %buffer% will be replaced by the corresponding
 `markdown-mode' buffer name.")
 
 (defun markdown-has-reference-definition (reference)
-    "Find out whether Markdown REFERENCE is defined.
+  "Find out whether Markdown REFERENCE is defined.
 
 REFERENCE should include the square brackets, like [this]."
-    (let ((reference (downcase reference)))
-      (save-excursion
-        (goto-char (point-min))
-        (catch 'found
-          (while (re-search-forward markdown-regex-reference-definition nil t)
-            (when (string= reference (downcase (match-string-no-properties 1)))
-              (throw 'found t)))))))
+  (let ((reference (downcase reference)))
+    (save-excursion
+      (goto-char (point-min))
+      (catch 'found
+        (while (re-search-forward markdown-regex-reference-definition nil t)
+          (when (string= reference (downcase (match-string-no-properties 1)))
+            (throw 'found t)))))))
 
 (defun markdown-get-undefined-refs ()
   "Return a list of undefined Markdown references.
@@ -1754,11 +1754,11 @@ REF is a Markdown reference in square brackets, like \"[lisp-history]\".
 When RECHECK is non-nil, BUFFER gets rechecked for undefined
 references so that REF disappears from the list of those links."
   (with-current-buffer buffer
-      (when (not (eq major-mode 'markdown-mode))
-        (error "Not available in current mode"))
-      (goto-char (point-max))
-      (indent-new-comment-line)
-      (insert (concat ref ": ")))
+    (when (not (eq major-mode 'markdown-mode))
+      (error "Not available in current mode"))
+    (goto-char (point-max))
+    (indent-new-comment-line)
+    (insert (concat ref ": ")))
   (switch-to-buffer-other-window buffer)
   (goto-char (point-max))
   (when recheck
@@ -1801,8 +1801,8 @@ defined."
   (let ((oldbuf (current-buffer))
         (refs (markdown-get-undefined-refs))
         (refbuf (get-buffer-create (markdown-replace-regexp-in-string
-                                 "%buffer%" (buffer-name)
-                                 markdown-refcheck-buffer))))
+                                    "%buffer%" (buffer-name)
+                                    markdown-refcheck-buffer))))
     (if (null refs)
         (progn
           (when (not silent)
@@ -1835,8 +1835,8 @@ defined."
                 ;; Insert line number as text in Emacs < 22
                 (insert (number-to-string line)))
               (insert " "))) (delete-char -1)
-          (insert ")")
-          (newline))
+              (insert ")")
+              (newline))
         (view-buffer-other-window refbuf)
         (goto-char (point-min))
         (forward-line 2)))))
@@ -1878,71 +1878,71 @@ at an atx-style header, cycle visibility of the corresponding
 subtree.  Otherwise, insert a tab using `indent-relative'."
   (interactive "P")
   (cond
-     ((eq arg t) ;; Global cycling
-      (cond
-       ((and (eq last-command this-command)
-             (eq markdown-cycle-global-status 2))
-        ;; Move from overview to contents
-        (hide-sublevels 1)
-        (message "CONTENTS")
-        (setq markdown-cycle-global-status 3))
+   ((eq arg t) ;; Global cycling
+    (cond
+     ((and (eq last-command this-command)
+           (eq markdown-cycle-global-status 2))
+      ;; Move from overview to contents
+      (hide-sublevels 1)
+      (message "CONTENTS")
+      (setq markdown-cycle-global-status 3))
 
-       ((and (eq last-command this-command)
-             (eq markdown-cycle-global-status 3))
-        ;; Move from contents to all
-        (show-all)
-        (message "SHOW ALL")
-        (setq markdown-cycle-global-status 1))
-
-       (t
-        ;; Defaults to overview
-        (hide-body)
-        (message "OVERVIEW")
-        (setq markdown-cycle-global-status 2))))
-
-     ((save-excursion (beginning-of-line 1) (looking-at outline-regexp))
-      ;; At a heading: rotate between three different views
-      (outline-back-to-heading)
-      (let ((goal-column 0) eoh eol eos)
-        ;; Determine boundaries
-        (save-excursion
-          (outline-back-to-heading)
-          (save-excursion
-            (beginning-of-line 2)
-            (while (and (not (eobp)) ;; this is like `next-line'
-                        (get-char-property (1- (point)) 'invisible))
-              (beginning-of-line 2)) (setq eol (point)))
-          (outline-end-of-heading)   (setq eoh (point))
-          (markdown-end-of-subtree t)
-          (skip-chars-forward " \t\n")
-          (beginning-of-line 1) ; in case this is an item
-          (setq eos (1- (point))))
-        ;; Find out what to do next and set `this-command'
-      (cond
-         ((= eos eoh)
-          ;; Nothing is hidden behind this heading
-          (message "EMPTY ENTRY")
-          (setq markdown-cycle-subtree-status nil))
-         ((>= eol eos)
-          ;; Entire subtree is hidden in one line: open it
-          (show-entry)
-          (show-children)
-          (message "CHILDREN")
-          (setq markdown-cycle-subtree-status 'children))
-         ((and (eq last-command this-command)
-               (eq markdown-cycle-subtree-status 'children))
-          ;; We just showed the children, now show everything.
-          (show-subtree)
-          (message "SUBTREE")
-          (setq markdown-cycle-subtree-status 'subtree))
-         (t
-          ;; Default action: hide the subtree.
-          (hide-subtree)
-          (message "FOLDED")
-          (setq markdown-cycle-subtree-status 'folded)))))
+     ((and (eq last-command this-command)
+           (eq markdown-cycle-global-status 3))
+      ;; Move from contents to all
+      (show-all)
+      (message "SHOW ALL")
+      (setq markdown-cycle-global-status 1))
 
      (t
-      (indent-for-tab-command))))
+      ;; Defaults to overview
+      (hide-body)
+      (message "OVERVIEW")
+      (setq markdown-cycle-global-status 2))))
+
+   ((save-excursion (beginning-of-line 1) (looking-at outline-regexp))
+    ;; At a heading: rotate between three different views
+    (outline-back-to-heading)
+    (let ((goal-column 0) eoh eol eos)
+      ;; Determine boundaries
+      (save-excursion
+        (outline-back-to-heading)
+        (save-excursion
+          (beginning-of-line 2)
+          (while (and (not (eobp)) ;; this is like `next-line'
+                      (get-char-property (1- (point)) 'invisible))
+            (beginning-of-line 2)) (setq eol (point)))
+        (outline-end-of-heading)   (setq eoh (point))
+        (markdown-end-of-subtree t)
+        (skip-chars-forward " \t\n")
+        (beginning-of-line 1) ; in case this is an item
+        (setq eos (1- (point))))
+      ;; Find out what to do next and set `this-command'
+      (cond
+       ((= eos eoh)
+        ;; Nothing is hidden behind this heading
+        (message "EMPTY ENTRY")
+        (setq markdown-cycle-subtree-status nil))
+       ((>= eol eos)
+        ;; Entire subtree is hidden in one line: open it
+        (show-entry)
+        (show-children)
+        (message "CHILDREN")
+        (setq markdown-cycle-subtree-status 'children))
+       ((and (eq last-command this-command)
+             (eq markdown-cycle-subtree-status 'children))
+        ;; We just showed the children, now show everything.
+        (show-subtree)
+        (message "SUBTREE")
+        (setq markdown-cycle-subtree-status 'subtree))
+       (t
+        ;; Default action: hide the subtree.
+        (hide-subtree)
+        (message "FOLDED")
+        (setq markdown-cycle-subtree-status 'folded)))))
+
+   (t
+    (indent-for-tab-command))))
 
 ;; Based on org-shifttab from org.el.
 (defun markdown-shifttab ()
@@ -2073,12 +2073,12 @@ returned by `match-data'.  Note that the potential wiki link name must
 be available via `match-string'."
   (let ((case-fold-search nil))
     (and (thing-at-point-looking-at markdown-regex-wiki-link)
-	 (or (not buffer-file-name)
-	     (not (string-equal (buffer-file-name)
-				(markdown-convert-wiki-link-to-filename
+         (or (not buffer-file-name)
+             (not (string-equal (buffer-file-name)
+                                (markdown-convert-wiki-link-to-filename
                                  (markdown-wiki-link-link)))))
-	 (not (save-match-data
-		(save-excursion))))))
+         (not (save-match-data
+                (save-excursion))))))
 
 (defun markdown-wiki-link-link ()
   "Return the link part of the wiki link using current match data.
@@ -2124,10 +2124,10 @@ See `markdown-wiki-link-p' and `markdown-follow-wiki-link'."
 See `markdown-wiki-link-p'."
   (interactive)
   (if (markdown-wiki-link-p)
-      ; At a wiki link already, move past it.
+                                        ; At a wiki link already, move past it.
       (goto-char (+ 1 (match-end 0))))
   (save-match-data
-    ; Search for the next wiki link and move to the beginning.
+                                        ; Search for the next wiki link and move to the beginning.
     (re-search-forward markdown-regex-wiki-link nil t)
     (goto-char (match-beginning 0))))
 
@@ -2154,15 +2154,15 @@ and highlight accordingly."
   (goto-char from)
   (while (re-search-forward markdown-regex-wiki-link to t)
     (let ((highlight-beginning (match-beginning 0))
-	  (highlight-end (match-end 0))
-	  (file-name
-	   (markdown-convert-wiki-link-to-filename
+          (highlight-end (match-end 0))
+          (file-name
+           (markdown-convert-wiki-link-to-filename
             (markdown-wiki-link-link))))
       (if (file-exists-p file-name)
-	  (markdown-highlight-wiki-link
-	   highlight-beginning highlight-end markdown-link-face)
-	(markdown-highlight-wiki-link
-	 highlight-beginning highlight-end markdown-missing-link-face)))))
+          (markdown-highlight-wiki-link
+           highlight-beginning highlight-end markdown-link-face)
+        (markdown-highlight-wiki-link
+         highlight-beginning highlight-end markdown-missing-link-face)))))
 
 (defun markdown-extend-changed-region (from to)
   "Extend region given by FROM and TO so that we can fontify all links.
@@ -2172,14 +2172,14 @@ newline after."
   (goto-char from)
   (re-search-backward "\n" nil t)
   (let ((new-from (point-min))
-	(new-to (point-max)))
+        (new-to (point-max)))
     (if (not (= (point) from))
-	(setq new-from (point)))
+        (setq new-from (point)))
     ;; do the same thing for the first new line after 'to
     (goto-char to)
     (re-search-forward "\n" nil t)
     (if (not (= (point) to))
-	(setq new-to (point)))
+        (setq new-to (point)))
     (list new-from new-to)))
 
 (defun markdown-check-change-for-wiki-link (from to change)
@@ -2189,13 +2189,13 @@ CHANGE is the number of bytes of pre-change text replaced by the
 given range."
   (interactive "nfrom: \nnto: \nnchange: ")
   (let* ((inhibit-quit t)
-	 (modified (buffer-modified-p))
-	 (buffer-undo-list t)
-	 (inhibit-read-only t)
-	 (inhibit-point-motion-hooks t)
-	 (inhibit-modification-hooks t)
-	 (current-point (point))
-	 deactivate-mark)
+         (modified (buffer-modified-p))
+         (buffer-undo-list t)
+         (inhibit-read-only t)
+         (inhibit-point-motion-hooks t)
+         (inhibit-modification-hooks t)
+         (current-point (point))
+         deactivate-mark)
     (unwind-protect
         (save-match-data
           (save-restriction
@@ -2283,9 +2283,9 @@ This is an exact copy of `line-number-at-pos' for use in emacs21."
 
   ;; Prepare hooks for XEmacs compatibility
   (when (featurep 'xemacs)
-      (make-local-hook 'after-change-functions)
-      (make-local-hook 'font-lock-extend-region-functions)
-      (make-local-hook 'window-configuration-change-hook))
+    (make-local-hook 'after-change-functions)
+    (make-local-hook 'font-lock-extend-region-functions)
+    (make-local-hook 'window-configuration-change-hook))
 
   ;; Multiline font lock
   (add-hook 'font-lock-extend-region-functions
@@ -2298,12 +2298,12 @@ This is an exact copy of `line-number-at-pos' for use in emacs21."
   ;; creating one of the wiki link documents. Make sure we get
   ;; refontified when we come back.
   (add-hook 'window-configuration-change-hook
-	    'markdown-fontify-buffer-wiki-links t t)
+            'markdown-fontify-buffer-wiki-links t t)
 
   ;; do the initial link fontification
   (markdown-fontify-buffer-wiki-links))
 
-;(add-to-list 'auto-mode-alist '("\\.text$" . markdown-mode))
+                                        ;(add-to-list 'auto-mode-alist '("\\.text$" . markdown-mode))
 
 ;;; GitHub Flavored Markdown Mode  ============================================
 

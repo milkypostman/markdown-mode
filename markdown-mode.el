@@ -1,6 +1,6 @@
 ;;; markdown-mode.el --- Emacs Major mode for Markdown-formatted text files
 
-;; Copyright (C) 2011 Donald Ephraim Curtis <dcurtis@milkbox.net>
+;; Copyright (C) 2011, 2012 Donald Ephraim Curtis <dcurtis@milkbox.net>
 ;; Copyright (C) 2007-2011 Jason R. Blevins <jrblevin@sdf.org>
 ;; Copyright (C) 2007, 2009 Edward O'Connor <ted@oconnor.cx>
 ;; Copyright (C) 2007 Conal Elliott <conal@conal.net>
@@ -20,11 +20,11 @@
 ;; Copyright (C) 2011 Joost Kremers <joostkremers@fastmail.fm>
 
 ;; Author: Jason R. Blevins <jrblevin@sdf.org>
-;; Maintainer: Jason R. Blevins <jrblevin@sdf.org>
+;; Maintainer: Donald Ephraim Curtis <dcurtis@milkbox.net
 ;; Created: May 24, 2007
-;; Version: 1.8.1
+;; Version: 1.8.2
 ;; Keywords: Markdown, GitHub Flavored Markdown, itex
-;; URL: http://jblevins.org/projects/markdown-mode/
+;; URL: http://github.com/milkypostman/markdown-mode
 
 ;; This file is not part of GNU Emacs.
 
@@ -424,7 +424,6 @@
 ;; [Version 1.8]: http://jblevins.org/projects/markdown-mode/rev-1-8
 ;; [Version 1.8.1]: http://jblevins.org/projects/markdown-mode/rev-1-8-1
 
-
 ;;; Code:
 
 (require 'easymenu)
@@ -433,7 +432,7 @@
 
 ;;; Constants =================================================================
 
-(defconst markdown-mode-version "1.8.1"
+(defconst markdown-mode-version "1.8.2"
   "Markdown mode version number.")
 
 (defconst markdown-output-buffer-name "*markdown-output*"
@@ -1357,7 +1356,22 @@ the blockquote text."
       (markdown-blockquote-region (region-beginning) (region-end))
     (insert "> ")))
 
-;;;###autoload
+(defun markdown-beginning-of-defun ()
+  "`beginning-of-defun-function' for Markdown.
+Move to the beginning of the next section."
+  (if (re-search-backward "\\(^#+ \\|^.+[^[:space:]].*\n\\(-+\\|=+\\)$\\)" nil t)
+      (match-beginning 0)
+    (point-min)))
+
+(defun markdown-end-of-defun ()
+  "`end-of-defun-function' for Markdown.
+Move to the end of the current section."
+  (end-of-line)
+  (if (re-search-forward
+       "\\(^#+ \\|^.+[^[:space:]].*\n\\(-+\\|=+\\)$\\)" nil t)
+      (goto-char (match-beginning 0))
+    (goto-char (point-max))))
+
 (defun markdown-select-section ()
   "Select the current section.  FIX: needs more functionality added to make
 behavior more DWIM."
@@ -2346,6 +2360,9 @@ This is an exact copy of `line-number-at-pos' for use in emacs21."
   (set (make-local-variable 'font-lock-multiline) t)
   ;; For menu support in XEmacs
   (easy-menu-add markdown-mode-menu markdown-mode-map)
+  (set (make-local-variable 'beginning-of-defun-function)
+       'markdown-beginning-of-defun)
+  (set (make-local-variable 'end-of-defun-function) 'markdown-end-of-defun)
   ;; Make filling work with lists (unordered, ordered, and definition)
   (set (make-local-variable 'paragraph-start)
        "\f\\|[ \t]*$\\|^[ \t]*[*+-] \\|^[ \t]*[0-9]+\\.\\|^[ \t]*: ")

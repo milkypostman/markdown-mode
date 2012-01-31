@@ -1357,6 +1357,24 @@ the blockquote text."
       (markdown-blockquote-region (region-beginning) (region-end))
     (insert "> ")))
 
+;;;###autoload
+(defun markdown-select-section ()
+  "Select the current section.  FIX: needs more functionality added to make
+behavior more DWIM."
+  (interactive)
+  (end-of-line)
+  (let ((begin (or (and
+                    (re-search-backward "^\\(#+\\) " nil t)
+                    (point))
+                   (point-min)))
+        (level (or (length (match-string-no-properties 1)) 1))
+        end)
+    (setq end (if (re-search-forward (format "^#\\{1,%d\\} " level) nil t 2)
+                  (point-at-bol)
+                (point-max)))
+    (goto-char begin)
+    (push-mark end nil t)))
+
 (defun markdown-block-region (beg end prefix)
   "Format the region using a block prefix.
 Arguments BEG and END specify the beginning and end of the

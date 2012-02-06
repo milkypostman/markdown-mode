@@ -551,6 +551,12 @@ This will not take effect until Emacs is restarted."
 (defvar markdown-bold-face 'markdown-bold-face
   "Face name to use for bold text.")
 
+(defvar markdown-header-delimiter-face 'markdown-header-delimiter-face
+  "Face name to use as a base for header delimiters.")
+
+(defvar markdown-header-rule-face 'markdown-header-rule-face
+  "Face name to use as a base for header rules.")
+
 (defvar markdown-header-face 'markdown-header-face
   "Face name to use as a base for headers.")
 
@@ -621,6 +627,16 @@ This will not take effect until Emacs is restarted."
 (defface markdown-bold-face
   '((t (:inherit font-lock-variable-name-face :weight bold)))
   "Face for bold text."
+  :group 'markdown-faces)
+
+(defface markdown-header-rule-face
+  '((t (:inherit font-lock-function-name-face :weight bold)))
+  "Base face for headers rules."
+  :group 'markdown-faces)
+
+(defface markdown-header-delimiter-face
+  '((t (:inherit font-lock-function-name-face :weight bold)))
+  "Base face for headers hash delimiter."
   :group 'markdown-faces)
 
 (defface markdown-header-face
@@ -719,15 +735,15 @@ This will not take effect until Emacs is restarted."
   :group 'markdown-faces)
 
 (defconst markdown-regex-link-inline
-  "\\(!?\\[[^]]*?\\]\\)\\(([^\\)]*)\\)"
+  "\\[\\(!?[^]]*?\\)\\](\\([^\\)]*\\))"
   "Regular expression for a [text](file) or an image link ![text](file).")
 
 (defconst markdown-regex-link-reference
-  "\\(!?\\[[^]]+?\\]\\)[ ]?\\(\\[[^]]*?\\]\\)"
+  "\\[\\(!?[^]]+?\\)\\][ ]?\\[\\([^]]*?\\)\\]"
   "Regular expression for a reference link [text][id].")
 
 (defconst markdown-regex-reference-definition
-  "^ \\{0,3\\}\\(\\[[^^]+?\\]\\):\\s *\\(.*?\\)\\s *\\( \"[^\"]*\"$\\|$\\)"
+  "^ \\{0,3\\}\\[\\([^^]+?\\)\\]:\\s *\\(.*?\\)\\s *\\( \"[^\"]*\"$\\|$\\)"
   "Regular expression for a link definition [id]: ...")
 
 (defconst markdown-regex-footnote
@@ -844,14 +860,28 @@ text.")
    '(markdown-match-pre-blocks 0 markdown-pre-face t t)
    '(markdown-match-fenced-code-blocks 0 markdown-pre-face t t)
    (cons markdown-regex-blockquote 'markdown-blockquote-face)
-   (cons markdown-regex-header-1-setext 'markdown-header-face-1)
-   (cons markdown-regex-header-2-setext 'markdown-header-face-2)
-   (cons markdown-regex-header-1-atx 'markdown-header-face-1)
-   (cons markdown-regex-header-2-atx 'markdown-header-face-2)
-   (cons markdown-regex-header-3-atx 'markdown-header-face-3)
-   (cons markdown-regex-header-4-atx 'markdown-header-face-4)
-   (cons markdown-regex-header-5-atx 'markdown-header-face-5)
-   (cons markdown-regex-header-6-atx 'markdown-header-face-6)
+   (cons markdown-regex-header-1-setext '((1 markdown-header-face-1)
+                                          (2 markdown-header-rule-face)))
+   (cons markdown-regex-header-2-setext '((1 markdown-header-face-2)
+                                          (2 markdown-header-rule-face)))
+   (cons markdown-regex-header-1-atx '((1 markdown-header-delimiter-face)
+                                       (2 markdown-header-face-1)
+                                       (3 markdown-header-delimiter-face)))
+   (cons markdown-regex-header-2-atx '((1 markdown-header-delimiter-face)
+                                       (2 markdown-header-face-2)
+                                       (3 markdown-header-delimiter-face)))
+   (cons markdown-regex-header-3-atx '((1 markdown-header-delimiter-face)
+                                       (2 markdown-header-face-3)
+                                       (3 markdown-header-delimiter-face)))
+   (cons markdown-regex-header-4-atx '((1 markdown-header-delimiter-face)
+                                       (2 markdown-header-face-4)
+                                       (3 markdown-header-delimiter-face)))
+   (cons markdown-regex-header-5-atx '((1 markdown-header-delimiter-face)
+                                       (2 markdown-header-face-5)
+                                       (3 markdown-header-delimiter-face)))
+   (cons markdown-regex-header-6-atx '((1 markdown-header-delimiter-face)
+                                       (2 markdown-header-face-6)
+                                       (3 markdown-header-delimiter-face)))
    (cons markdown-regex-hr 'markdown-header-face)
    '(markdown-match-comments 0 markdown-comment-face t t)
    (cons markdown-regex-code '(2 markdown-inline-code-face))

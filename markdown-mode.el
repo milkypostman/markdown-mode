@@ -1402,13 +1402,21 @@ Move to the end of the current section."
       (goto-char (match-beginning 0))
     (goto-char (point-max))))
 
-(defun markdown-select-section ()
-  "Select the current section.  FIX: needs more functionality added to make
-behavior more DWIM."
-  (interactive)
+(defun markdown--section-regex (level)
+  "Return a regex to match LEVEL or any level if not LEVEL."
+  (if level
+      (format "^\\(#\\{%d\\}\\) " level)
+    "^\\(#+\\) "))
+
+(defun markdown-select-section (level)
+  "Select the parent LEVEL section or current section.
+FIX: needs more functionality added to make behavior more DWIM."
+  (interactive "P")
   (end-of-line)
+  (when level
+    (setq level (prefix-numeric-value level)))
   (let ((begin (or (and
-                    (re-search-backward "^\\(#+\\) " nil t)
+                    (re-search-backward (markdown--section-regex level) nil t)
                     (point))
                    (point-min)))
         (level (or (length (match-string-no-properties 1)) 1))
@@ -1935,7 +1943,7 @@ Assume that the previously found match was for a numbered item in a list."
           (setq step nil)
           (setq continue nil))))
 
-       ((looking-at "^\\([\s-]*\\)[^	 \n\r].*$")
+       ((looking-at "^\\([\s-]*\\)[^     \n\r].*$")
         (setq cpfx (match-string-no-properties 1))
         (cond
          ;; reset if separated before

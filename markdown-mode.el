@@ -614,6 +614,9 @@ This will not take effect until Emacs is restarted."
 (defvar markdown-math-face 'markdown-math-face
   "Face name to use for LaTeX expressions.")
 
+(defvar markdown-language-keyword-face 'markdown-language-keyword-face
+  "Face for language identifier in 'pre' text.")
+
 (defgroup markdown-faces nil
   "Faces used in Markdown Mode"
   :group 'markdown
@@ -733,6 +736,12 @@ This will not take effect until Emacs is restarted."
   '((t (:inherit font-lock-string-face)))
   "Face for LaTeX expressions."
   :group 'markdown-faces)
+
+(defface markdown-language-keyword-face
+  '((t (:inherit font-lock-keyword-face)))
+  "Face for langauge identifier in 'pre' text."
+  :group 'markdown-faces)
+
 
 (defconst markdown-regex-link-inline
   "\\[\\(!?[^]]*?\\)\\](\\([^\\)]*\\))"
@@ -855,6 +864,19 @@ text.")
   "^\\(\\s *\\)\\([0-9]+\\.\\|[\\*\\+-]\\)\\(\\s +\\)"
   "Regular expression for matching indentation of list items.")
 
+(defun markdown-match-quoted-code-blocks (last)
+  "Match quoted code blocks from the point to LAST."
+  (cond ((search-forward-regexp "^\\(```\\).*" last t)
+         (beginning-of-line)
+         (let ((beg (point))
+               (end (progn (end-of-line) (point))))
+           (forward-line)
+           (cond ((search-forward-regexp (match-string 1) last t)
+                  (set-match-data (list beg (+ beg 3) (+ beg 3) end (1+ end) (point)))
+                  t)
+                 (t nil))))
+        (t nil)))
+
 (defvar markdown-mode-font-lock-keywords-basic
   (list
    '(markdown-match-pre-blocks 0 markdown-pre-face t t)
@@ -905,6 +927,7 @@ text.")
    )
   "Syntax highlighting for Markdown files.")
 
+
 (defconst markdown-mode-font-lock-keywords-latex
   (list
    ;; Math mode $..$ or $$..$$
@@ -923,6 +946,15 @@ text.")
        markdown-mode-font-lock-keywords-latex)
    markdown-mode-font-lock-keywords-basic)
   "Default highlighting expressions for Markdown mode.")
+
+(defvar markdown-mode-font-lock-keywords-gfm
+  (append
+   markdown-mode-font-lock-keywords
+   (list
+    (cons markdown-match-quoted-code-blocks
+          '((0 markdown-pre-face t t)
+            (1 markdown-language-keyword-face t t)
+            (2 markdown-pre-face t t))))))
 
 ;; Footnotes
 (defvar markdown-footnote-counter 0
@@ -2487,6 +2519,10 @@ This is an exact copy of `line-number-at-pos' for use in emacs21."
   (if (fboundp 'visual-line-mode)
       (visual-line-mode 1)
     (longlines-mode 1))
+
+  (set (make-local-variable 'font-lock-defaults)
+       '(markdown-mode-font-lock-keywords-gfm))
+
   ;; do the initial link fontification
   (markdown-fontify-buffer-wiki-links))
 

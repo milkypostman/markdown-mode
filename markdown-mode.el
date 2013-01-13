@@ -1,6 +1,6 @@
 ;;; markdown-mode.el --- Emacs Major mode for Markdown-formatted text files
 
-;; Copyright (C) 2011, 2012 Donald Ephraim Curtis <dcurtis@milkbox.net>
+;; Copyright (C) 2011-2013 Donald Ephraim Curtis <dcurtis@milkbox.net>
 ;; Copyright (C) 2007-2011 Jason R. Blevins <jrblevin@sdf.org>
 ;; Copyright (C) 2007, 2009 Edward O'Connor <ted@oconnor.cx>
 ;; Copyright (C) 2007 Conal Elliott <conal@conal.net>
@@ -22,7 +22,7 @@
 ;; Author: Jason R. Blevins <jrblevin@sdf.org>
 ;; Maintainer: Donald Ephraim Curtis <dcurtis@milkbox.net
 ;; Created: May 24, 2007
-;; Version: 1.8.2
+;; Version: 1.8.3
 ;; Keywords: Markdown, GitHub Flavored Markdown, itex
 ;; URL: http://github.com/milkypostman/markdown-mode
 
@@ -932,6 +932,19 @@ text.")
 (defconst markdown-footnote-chars
   "[[:alnum:]-]"
   "Regular expression maching any character that is allowed in a footnote identifier.")
+
+;; imenu information
+(setq markdown-imenu-generic-expression
+      `((nil ,markdown-regex-header-1-setext 1)
+        (nil ,markdown-regex-header-2-setext 1)
+        (nil ,markdown-regex-header-1-atx 2)
+        (nil ,markdown-regex-header-2-atx 2)
+        (nil ,markdown-regex-header-3-atx 2)
+        (nil ,markdown-regex-header-4-atx 2)
+        (nil ,markdown-regex-header-5-atx 2)
+        (nil ,markdown-regex-header-6-atx 2)
+        ("fn" "^\\[\\^\\(.*\\)\\]" 1)))
+
 
 
 
@@ -2417,6 +2430,8 @@ This is an exact copy of `line-number-at-pos' for use in emacs21."
   (set (make-local-variable 'font-lock-defaults)
        '(markdown-mode-font-lock-keywords))
   (set (make-local-variable 'font-lock-multiline) t)
+  ;; For imenu support
+  (set (make-local-variable 'imenu-generic-expression) markdown-imenu-generic-expression)
   ;; For menu support in XEmacs
   (easy-menu-add markdown-mode-menu markdown-mode-map)
   (set (make-local-variable 'beginning-of-defun-function)
@@ -2459,7 +2474,7 @@ This is an exact copy of `line-number-at-pos' for use in emacs21."
   ;; do the initial link fontification
   (markdown-fontify-buffer-wiki-links))
 
-                                        ;(add-to-list 'auto-mode-alist '("\\.text$" . markdown-mode))
+;; (add-to-list 'auto-mode-alist '("\\.text$" . markdown-mode))
 
 ;;; GitHub Flavored Markdown Mode  ============================================
 

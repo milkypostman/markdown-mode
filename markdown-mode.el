@@ -1577,6 +1577,34 @@ followed by a period."
      ;; if we're not in a list, start an unordered one
      (t (insert "* ")))))
 
+
+(defun gfm-insert-code-block (&optional lang)
+  "Insert a code block using a specific language highlighting queried
+from user.  If a region is active, wrap this region with the markup
+instead.  If the region boundaries are not on empty lines, these are
+added automatically in order to have the correct markup."
+  (interactive "sWhat language to use for highlighting: ")
+  (if (and transient-mark-mode mark-active)
+      (let ((b (region-beginning)) (e (region-end)))
+        (goto-char b)
+        ;; if we're on a blank line, insert the quotes here, otherwise
+        ;; add a new line first
+        (unless (looking-at "\n")
+          (newline)
+          (forward-line -1)
+          (setq e (1+ e)))
+        (insert "```" lang)
+        (goto-char (+ e 3 (length lang)))
+        ;; if we're on a blank line, don't newline, otherwise the ```
+        ;; should go on its own line
+        (unless (looking-back "\n")
+          (newline))
+        (insert "```"))
+    (insert "```" lang)
+    (newline 2)
+    (insert "```")
+    (forward-line -1)))
+
 ;;; Footnotes ======================================================================
 
 (defun markdown-footnote-counter-inc ()
@@ -1815,6 +1843,13 @@ it in the usual way."
     (define-key map "\C-c\C-cc" 'markdown-check-refs)
     map)
   "Keymap for Markdown major mode.")
+
+(defvar gfm-mode-map
+  (let ((map (make-sparse-keymap)))
+    (set-keymap-parent map markdown-mode-map)
+    (define-key map "\C-c\C-s\C-c" 'gfm-insert-code-block)
+    map)
+  "Keymap for `gfm-mode'.  See also `markdown-mode-map'.")
 
 ;;; Menu ==================================================================
 

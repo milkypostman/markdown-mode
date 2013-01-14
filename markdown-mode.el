@@ -1526,6 +1526,57 @@ Arguments BEG and END specify the beginning and end of the region."
   (interactive "*r")
   (markdown-block-region beg end "    "))
 
+(defun markdown-insert-list-item (&optional arg)
+  "Insert a newline and a list item.
+
+If ARG is `C-u', descend one level in indentation. If ARG is `C-u
+C-u' increase the indentation by one level.
+
+If the point is inside unordered list, insert the bullet
+mark (*).
+
+If the point is inside ordered list, insert the next number
+followed by a period."
+  (interactive "P")
+  ;; compute indentation
+  (let* ((prf (prefix-numeric-value arg))
+         (item-indent (save-excursion
+                        (beginning-of-line)
+                        (when (looking-at "^\\([ ]*\\)")
+                          (match-string 0))))
+         (indent (and item-indent
+                      (cond
+                       ((and arg (= prf 4))
+                        (max (- (length item-indent) 4) 0))
+                       ((and arg (= prf 16))
+                        (+ (length item-indent) 4))
+                       (t(length item-indent)))))
+         (new-indent (make-string indent 32)))
+    (cond
+     ;; are we in an unordered list?
+     ((save-excursion (beginning-of-line)
+                      (looking-at "^[ ]*\\*"))
+      (newline)
+      (insert (concat new-indent "* ")))
+     ((save-excursion (beginning-of-line)
+                      (looking-at "^[ ]*\\([0-9]+\\)\\."))
+      (newline)
+      (if (= prf 16) ;; starting a new column indented one more level
+          (insert (concat new-indent "1. "))
+        ;; travel up to the last item and pick the correct number.  If
+        ;; the argument was nil, "new-indent = item-indent" is the same,
+        ;; so we don't need special treatment. Neat.
+        (save-excursion
+          (while (not (looking-at (concat new-indent "\\([0-9]+\\)\\.")))
+            (forward-line -1)))
+
+        (insert (concat new-indent
+                        (int-to-string (1+ (string-to-int (match-string 1))))
+                        ". ")))
+      (markdown-cleanup-list-numbers))
+     ;; if we're not in a list, start an unordered one
+     (t (insert "* ")))))
+
 ;;; Footnotes ======================================================================
 
 (defun markdown-footnote-counter-inc ()
@@ -1735,6 +1786,7 @@ it in the usual way."
     (define-key map "\C-c-" 'markdown-insert-hr)
     (define-key map "\C-c\C-tt" 'markdown-insert-title)
     (define-key map "\C-c\C-ts" 'markdown-insert-section)
+    (define-key map (kbd "M-<return>") 'markdown-insert-list-item)
     ;; Footnotes
     (define-key map "\C-c\C-fn" 'markdown-footnote-new)
     (define-key map "\C-c\C-fg" 'markdown-footnote-goto-text)
@@ -1969,7 +2021,7 @@ Assume that the previously found match was for a numbered item in a list."
         (continue t)
         (step t)
         (sep nil))
-    (while continue
+    (while (and continue (not (eobp)))
       (setq step t)
       (cond
        ((looking-at "^\\([\s-]*\\)[0-9]+\\. ")

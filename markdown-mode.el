@@ -951,7 +951,7 @@ text.")
   (append
    markdown-mode-font-lock-keywords
    (list
-    (cons markdown-match-quoted-code-blocks
+    (cons 'markdown-match-quoted-code-blocks
           '((0 markdown-pre-face t t)
             (1 markdown-language-keyword-face t t)
             (2 markdown-pre-face t t))))))

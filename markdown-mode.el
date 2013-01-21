@@ -1467,7 +1467,8 @@ FIX: needs more functionality added to make behavior more DWIM."
                    (point-min)))
         (level (or (length (match-string-no-properties 1)) 1))
         end)
-    (setq end (if (re-search-forward (format "^#\\{1,%d\\} " level) nil t 2)
+    (setq end (if (ignore-errors
+                    (re-search-forward (format "^#\\{1,%d\\} " level) nil t 2))
                   (point-at-bol)
                 (point-max)))
     (goto-char begin)

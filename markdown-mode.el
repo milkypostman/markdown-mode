@@ -1573,7 +1573,7 @@ followed by a period."
             (forward-line -1)))
 
         (insert (concat new-indent
-                        (int-to-string (1+ (string-to-int (match-string 1))))
+                        (int-to-string (1+ (string-to-number (match-string 1))))
                         ". ")))
       (markdown-cleanup-list-numbers))
      ;; if we're not in a list, start an unordered one

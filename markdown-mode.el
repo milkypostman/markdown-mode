@@ -4354,9 +4354,9 @@ This is an exact copy of `line-number-at-pos' for use in emacs21."
        '(gfm-font-lock-keywords))
   (auto-fill-mode 0)
   ;; Use visual-line-mode if available, fall back to longlines-mode:
-  (if (fboundp 'visual-line-mode)
-      (visual-line-mode 1)
-    (longlines-mode 1))
+  (funcall (eval-when-compile (if (fboundp 'visual-line-mode)
+                                  'visual-line-mode
+                                'longlines-mode)) 1)
   ;; do the initial link fontification
   (markdown-fontify-buffer-wiki-links))
 
